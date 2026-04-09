@@ -1,11 +1,9 @@
-<img width="1364" height="686" alt="image" src="https://github.com/user-attachments/assets/445c0d2b-23a4-45f1-9083-4c8904c9b6fd" /># Distributed-Scheduling-System
-# ⚡ Distributed Process Scheduling System
+# Distributed Process Scheduling System
 
 A **web-based CPU scheduling simulator** that visualizes and compares multiple scheduling algorithms in real-time.
 This project demonstrates core **Operating System concepts** with an interactive and modern UI.
 
 ---
-
 ## 🚀 Features
 
 * 🔄 Supports multiple scheduling algorithms:
@@ -175,6 +173,8 @@ http://127.0.0.1:5000
 | P3      | 2            | 8          |
 
 ---
+outputs
+<img width="1364" height="686" alt="image" src="https://github.com/user-attachments/assets/445c0d2b-23a4-45f1-9083-4c8904c9b6fd" /># Distributed-Scheduling-System
 
 ## 🎯 Use Cases
 
