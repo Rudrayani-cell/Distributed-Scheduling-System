@@ -175,8 +175,9 @@ http://127.0.0.1:5000
 ---
 outputs
 <img width="1364" height="686" alt="image" src="https://github.com/user-attachments/assets/445c0d2b-23a4-45f1-9083-4c8904c9b6fd" /># Distributed-Scheduling-System
-# Distributed-Scheduling-System Comparison
-<img width="1364" height="686" alt="Algorithm Comparison" src="https://github.com/user-attachments/assets/445c0d2b-23a4-45f1-9083-4c8904c9b6fd" />
+# Distributed-Scheduling-System 
+<img width="1362" height="620" alt="image" src="https://github.com/user-attachments/assets/897caf62-7745-4494-b954-4a10ea6fe638" />
+
 ## 🎯 Use Cases
 
 * Operating System learning
