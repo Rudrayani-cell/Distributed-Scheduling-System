@@ -175,7 +175,8 @@ http://127.0.0.1:5000
 ---
 outputs
 <img width="1364" height="686" alt="image" src="https://github.com/user-attachments/assets/445c0d2b-23a4-45f1-9083-4c8904c9b6fd" /># Distributed-Scheduling-System
-
+# Distributed-Scheduling-System Comparison
+<img width="1364" height="686" alt="Algorithm Comparison" src="https://github.com/user-attachments/assets/445c0d2b-23a4-45f1-9083-4c8904c9b6fd" />
 ## 🎯 Use Cases
 
 * Operating System learning
@@ -192,13 +193,13 @@ This project provides a complete simulation of CPU scheduling with:
 It helps users understand how different scheduling strategies impact system performance.
 
 ## 👨‍💻 Authors
-Rudrayani Adichwal
+Rudrayani Adichwal 
 Yash Kate 
 Khushi Wasnik
 Manas Hardikar
 Arkaj Rankhambe
 
-* B.Tech Students
+* B.Tech Student
 * Interested in OS,CN, AI, ML & Systems
 
 ## 📌 Future Enhancements
@@ -207,6 +208,3 @@ Arkaj Rankhambe
 🌐 Deploy on cloud (Render / Railway)
 🎞️ Real-time animation of scheduling
 
-## ⭐ If you like this project
-
-Give it a ⭐ on GitHub!
