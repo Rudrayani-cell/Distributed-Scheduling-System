@@ -193,13 +193,8 @@ This project provides a complete simulation of CPU scheduling with:
 
 It helps users understand how different scheduling strategies impact system performance.
 
-## 👨‍💻 Authors
+## 👨‍💻 Author
 Rudrayani Adichwal 
-Yash Kate 
-Khushi Wasnik
-Manas Hardikar
-Arkaj Rankhambe
-
 * B.Tech Student
 * Interested in OS,CN, AI, ML & Systems
 
