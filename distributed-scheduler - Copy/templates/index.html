@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distributed Scheduling System | OS Visualizer</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js for comparison graph -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Enhanced background gradient */
+            background: linear-gradient(135deg, #f0f4ff 0%, #e9f0fd 50%, #f4f7fc 100%);
+            color: #1e293b;
+            line-height: 1.5;
+            padding: 2rem 1.5rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-weight: 700;
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #1e3a8a, #6d28d9);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header i {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 15px -5px rgba(0,0,0,0.08);
+            color: #2563eb;
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(4px);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        /* Cards with glass effect */
+        .card {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 28px;
+            padding: 1.75rem;
+            box-shadow: 0 15px 30px -8px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.02);
+            border: 1px solid rgba(255,255,255,0.6);
+            margin-bottom: 2rem;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 25px 40px -12px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header h2 {
+            font-weight: 600;
+            font-size: 1.6rem;
+            color: #0f172a;
+        }
+
+        .card-header i {
+            color: #2563eb;
+            background: #eef2ff;
+            padding: 0.5rem;
+            border-radius: 12px;
+        }
+
+        /* Task Table */
+        .task-table-container {
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem 1.25rem;
+            background: #fafcff;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #334155;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        td {
+            padding: 0.75rem 1.25rem;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.65rem 0.75rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.15s;
+            background: white;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
+
+        .btn-icon:hover {
+            background: #fee2e2;
+        }
+
+        .btn-add {
+            background: white;
+            border: 1.5px dashed #94a3b8;
+            color: #2563eb;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-add:hover {
+            background: #f8fafc;
+            border-color: #2563eb;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .algo-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .algo-option {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(4px);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            border: 1px solid rgba(255,255,255,0.8);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .algo-option.selected {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .algo-option input {
+            display: none;
+        }
+
+        .quantum-input {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .quantum-input label {
+            font-weight: 500;
+            color: #334155;
+        }
+
+        .quantum-input input {
+            width: 90px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-left: auto;
+        }
+
+        .btn {
+            padding: 0.75rem 1.8rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.04);
+        }
+
+        .btn-primary {
+            background: linear-gradient(145deg, #2563eb, #1d4ed8);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+            transform: translateY(-1px);
+            box-shadow: 0 12px 18px -6px rgba(37,99,235,0.25);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1e293b;
+            border: 1.5px solid #cbd5e1;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        /* Gantt Chart */
+        .gantt-container {
+            margin: 1.5rem 0 2rem;
+        }
+
+        .gantt-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #334155;
+        }
+
+        .gantt-chart {
+            display: flex;
+            height: 56px;
+            background: #f1f5f9;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .gantt-block {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            border-right: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            min-width: 40px;
+            padding: 0 4px;
+        }
+
+        .gantt-block:last-child {
+            border-right: none;
+        }
+
+        .gantt-idle {
+            background: #cbd5e1;
+            color: #475569;
+            text-shadow: none;
+        }
+
+        /* Results Table */
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .stats-table th {
+            background: #f8fafc;
+            padding: 0.9rem 1rem;
+        }
+
+        .stats-table td {
+            padding: 0.8rem 1rem;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .comp-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.25rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+        }
+
+        .comp-card.best {
+            background: #ecfdf5;
+            border-color: #10b981;
+        }
+
+        .comp-algo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .comp-values {
+            display: flex;
+            justify-content: space-between;
+            color: #475569;
+        }
+
+        .best-badge {
+            color: #10b981;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .flex {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Chart container */
+        .chart-container {
+            margin-top: 2rem;
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+        .chart-container canvas {
+            max-height: 300px;
+            width: 100% !important;
+        }
+
+        /* Back to welcome link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #475569;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover {
+            color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Back to welcome -->
+    <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Back to Welcome</a>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>
+            <i class="fas fa-microchip"></i>
+            Distributed Scheduling System
+        </h1>
+        <div class="badge">
+            <i class="far fa-clock"></i> FCFS · SJF · SRJF · RR
+        </div>
+    </div>
+
+    <!-- Task Input Card -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-tasks"></i>
+            <h2>Process Configuration</h2>
+        </div>
+        <div class="task-table-container">
+            <table id="taskTable">
+                <thead>
+                    <tr>
+                        <th>Process ID</th>
+                        <th>Arrival Time</th>
+                        <th>Burst Time</th>
+                        <th style="width: 50px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="taskBody">
+                    <!-- Default rows will be populated by JS -->
+                </tbody>
+            </table>
+        </div>
+        <button class="btn-add" id="addRowBtn">
+            <i class="fas fa-plus-circle"></i> Add Process
+        </button>
+
+        <!-- Algorithm Selection & Actions -->
+        <div class="controls">
+            <div class="algo-group" id="algoGroup">
+                <label class="algo-option selected" data-algo="FCFS">
+                    <input type="radio" name="algorithm" value="FCFS" checked> FCFS
+                </label>
+                <label class="algo-option" data-algo="SJF">
+                    <input type="radio" name="algorithm" value="SJF"> SJF
+                </label>
+                <label class="algo-option" data-algo="SRJF">
+                    <input type="radio" name="algorithm" value="SRJF"> SRJF
+                </label>
+                <label class="algo-option" data-algo="RR">
+                    <input type="radio" name="algorithm" value="RR"> Round Robin
+                </label>
+            </div>
+
+            <div class="quantum-input" id="quantumWrapper">
+                <label><i class="fas fa-layer-group"></i> Quantum</label>
+                <input type="number" id="quantum" value="2" min="1" step="1">
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="runBtn">
+                    <i class="fas fa-play"></i> Run Scheduling
+                </button>
+                <button class="btn btn-secondary" id="compareBtn">
+                    <i class="fas fa-chart-bar"></i> Compare All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section (hidden initially) -->
+    <div id="resultsCard" class="card hidden">
+        <div class="card-header">
+            <i class="fas fa-chart-line"></i>
+            <h2>Scheduling Results</h2>
+        </div>
+
+        <!-- Gantt Chart -->
+        <div class="gantt-container">
+            <div class="gantt-title"><i class="far fa-calendar-alt"></i> Execution Timeline (Gantt Chart)</div>
+            <div id="ganttChart" class="gantt-chart"></div>
+        </div>
+
+        <!-- Process Stats Table -->
+        <div style="overflow-x: auto;">
+            <table class="stats-table" id="statsTable">
+                <thead>
+                    <tr>
+                        <th>Process</th>
+                        <th>Start Time</th>
+                        <th>Finish Time</th>
+                        <th>Waiting Time</th>
+                        <th>Turnaround Time</th>
+                    </tr>
+                </thead>
+                <tbody id="statsBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Averages -->
+        <div class="flex" style="margin-top: 1.5rem; justify-content: flex-end; gap: 2rem;">
+            <div><strong>Avg Waiting:</strong> <span id="avgWait">0.00</span></div>
+            <div><strong>Avg Turnaround:</strong> <span id="avgTurn">0.00</span></div>
+        </div>
+    </div>
+
+    <!-- Comparison Card (hidden) -->
+    <div id="comparisonCard" class="card hidden">
+        <div class="card-header">
+            <i class="fas fa-balance-scale"></i>
+            <h2>Algorithm Comparison</h2>
+        </div>
+        <!-- Comparison grid cards -->
+        <div id="comparisonContent"></div>
+        <!-- Chart for visual comparison -->
+        <div class="chart-container">
+            <canvas id="comparisonChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- DOM Elements ----------
+        const taskBody = document.getElementById('taskBody');
+        const addRowBtn = document.getElementById('addRowBtn');
+        const algoOptions = document.querySelectorAll('.algo-option');
+        const quantumWrapper = document.getElementById('quantumWrapper');
+        const quantumInput = document.getElementById('quantum');
+        const runBtn = document.getElementById('runBtn');
+        const compareBtn = document.getElementById('compareBtn');
+        const resultsCard = document.getElementById('resultsCard');
+        const comparisonCard = document.getElementById('comparisonCard');
+        const ganttChart = document.getElementById('ganttChart');
+        const statsBody = document.getElementById('statsBody');
+        const avgWaitSpan = document.getElementById('avgWait');
+        const avgTurnSpan = document.getElementById('avgTurn');
+        const comparisonContent = document.getElementById('comparisonContent');
+
+        // Chart instance variable
+        let comparisonChartInstance = null;
+
+        // ---------- Helper: Color palette for processes ----------
+        const colorPalette = [
+            '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#ef4444', '#6366f1'
+        ];
+
+        // ---------- Initialize default tasks ----------
+        function getDefaultTasks() {
+            return [
+                { id: 'P1', arrival: 0, burst: 5 },
+                { id: 'P2', arrival: 1, burst: 3 },
+                { id: 'P3', arrival: 2, burst: 8 },
+                { id: 'P4', arrival: 3, burst: 6 }
+            ];
+        }
+
+        function renderTaskRows(tasks) {
+            taskBody.innerHTML = '';
+            tasks.forEach((t, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="text" class="task-id" value="${t.id}" placeholder="P${index+1}"></td>
+                    <td><input type="number" class="task-arrival" value="${t.arrival}" min="0" step="1"></td>
+                    <td><input type="number" class="task-burst" value="${t.burst}" min="1" step="1"></td>
+                    <td><button class="btn-icon delete-row"><i class="fas fa-trash-alt"></i></button></td>
+                `;
+                taskBody.appendChild(row);
+            });
+            attachDeleteEvents();
+        }
+
+        function attachDeleteEvents() {
+            document.querySelectorAll('.delete-row').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const row = e.target.closest('tr');
+                    if (taskBody.children.length > 1) {
+                        row.remove();
+                    } else {
+                        alert('At least one process is required.');
+                    }
+                });
+            });
+        }
+
+        // Collect tasks from table
+        function getTasksFromTable() {
+            const rows = taskBody.querySelectorAll('tr');
+            const tasks = [];
+            rows.forEach((row, idx) => {
+                const idInput = row.querySelector('.task-id');
+                const arrivalInput = row.querySelector('.task-arrival');
+                const burstInput = row.querySelector('.task-burst');
+                let taskId = idInput.value.trim();
+                if (!taskId) taskId = `P${idx+1}`;
+                const arrival = parseInt(arrivalInput.value) || 0;
+                const burst = parseInt(burstInput.value) || 1;
+                tasks.push({
+                    task_id: taskId,
+                    arrival_time: arrival,
+                    burst_time: burst
+                });
+            });
+            return tasks;
+        }
+
+        // Add new row
+        addRowBtn.addEventListener('click', () => {
+            const newId = `P${taskBody.children.length + 1}`;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="text" class="task-id" value="${newId}"></td>
+                <td><input type="number" class="task-arrival" value="0" min="0"></td>
+                <td><input type="number" class="task-burst" value="1" min="1"></td>
+                <td><button class="btn-icon delete-row"><i class="fas fa-trash-alt"></i></button></td>
+            `;
+            taskBody.appendChild(row);
+            attachDeleteEvents();
+        });
+
+        // Algorithm selection UI
+        algoOptions.forEach(opt => {
+            opt.addEventListener('click', () => {
+                const radio = opt.querySelector('input');
+                radio.checked = true;
+                algoOptions.forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                // Toggle quantum visibility
+                if (radio.value === 'RR') {
+                    quantumWrapper.classList.remove('hidden');
+                } else {
+                    quantumWrapper.classList.add('hidden');
+                }
+            });
+        });
+
+        // Set initial state
+        renderTaskRows(getDefaultTasks());
+        quantumWrapper.classList.add('hidden'); // FCFS selected by default
+
+        // ---------- API Calls ----------
+        async function runScheduling() {
+            const tasks = getTasksFromTable();
+            const algo = document.querySelector('input[name="algorithm"]:checked').value;
+            const quantum = parseInt(quantumInput.value) || 2;
+
+            const payload = { tasks, algorithm: algo, quantum };
+
+            try {
+                const response = await fetch('/schedule', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error('Scheduling failed');
+                const data = await response.json();
+                displayResults(data, algo);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function runComparison() {
+            const tasks = getTasksFromTable();
+            const quantum = parseInt(quantumInput.value) || 2;
+            const payload = { tasks, quantum };
+
+            try {
+                const response = await fetch('/compare', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error('Comparison failed');
+                const data = await response.json();
+                displayComparison(data);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // ---------- Display Results ----------
+        function displayResults(data, algorithm) {
+            const result = data.result || [];
+            const timeline = data.timeline || [];
+
+            resultsCard.classList.remove('hidden');
+            comparisonCard.classList.add('hidden');
+
+            renderGantt(timeline);
+            renderStatsTable(result);
+
+            if (result.length > 0) {
+                const avgWait = result.reduce((sum, t) => sum + t.waiting_time, 0) / result.length;
+                const avgTurn = result.reduce((sum, t) => sum + t.turnaround_time, 0) / result.length;
+                avgWaitSpan.textContent = avgWait.toFixed(2);
+                avgTurnSpan.textContent = avgTurn.toFixed(2);
+            } else {
+                avgWaitSpan.textContent = '0.00';
+                avgTurnSpan.textContent = '0.00';
+            }
+
+            resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function renderGantt(timeline) {
+            ganttChart.innerHTML = '';
+            if (!timeline.length) {
+                ganttChart.innerHTML = '<div class="gantt-block gantt-idle" style="flex:1;">No data</div>';
+                return;
+            }
+
+            const segments = [];
+            let current = { task: timeline[0].task, start: timeline[0].time, count: 1 };
+            for (let i = 1; i < timeline.length; i++) {
+                const item = timeline[i];
+                if (item.task === current.task) {
+                    current.count++;
+                } else {
+                    segments.push({ ...current });
+                    current = { task: item.task, start: item.time, count: 1 };
+                }
+            }
+            segments.push(current);
+
+            const totalTime = timeline.length;
+            
+            segments.forEach(seg => {
+                const block = document.createElement('div');
+                block.className = 'gantt-block';
+                if (seg.task === 'Idle') {
+                    block.classList.add('gantt-idle');
+                    block.textContent = 'Idle';
+                } else {
+                    const hash = seg.task.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                    const color = colorPalette[hash % colorPalette.length];
+                    block.style.backgroundColor = color;
+                    block.textContent = seg.task;
+                }
+                const flexVal = (seg.count / totalTime) * 100;
+                block.style.flex = `${flexVal} 1 0%`;
+                block.setAttribute('title', `${seg.task}: ${seg.count} units`);
+                ganttChart.appendChild(block);
+            });
+        }
+
+        function renderStatsTable(result) {
+            statsBody.innerHTML = '';
+            result.sort((a, b) => a.start - b.start);
+            result.forEach(p => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${p.task}</strong></td>
+                    <td>${p.start}</td>
+                    <td>${p.finish}</td>
+                    <td>${p.waiting_time}</td>
+                    <td>${p.turnaround_time}</td>
+                `;
+                statsBody.appendChild(row);
+            });
+        }
+
+        // ---------- Comparison Display (with Chart) ----------
+        function displayComparison(data) {
+            const comp = data.comparison; // {FCFS: [avgWait, avgTurn], ...}
+            const best = data.best;
+
+            resultsCard.classList.add('hidden');
+            comparisonCard.classList.remove('hidden');
+
+            // Render cards
+            let html = `<div class="comparison-grid">`;
+            for (const [algo, vals] of Object.entries(comp)) {
+                const isBest = (algo === best);
+                html += `
+                    <div class="comp-card ${isBest ? 'best' : ''}">
+                        <div class="comp-algo">
+                            ${algo}
+                            ${isBest ? '<span class="best-badge"><i class="fas fa-trophy"></i> Best</span>' : ''}
+                        </div>
+                        <div class="comp-values">
+                            <span>Avg Wait:</span>
+                            <strong>${vals[0].toFixed(2)}</strong>
+                        </div>
+                        <div class="comp-values">
+                            <span>Avg Turnaround:</span>
+                            <strong>${vals[1].toFixed(2)}</strong>
+                        </div>
+                    </div>
+                `;
+            }
+            html += `</div>`;
+            comparisonContent.innerHTML = html;
+
+            // Render chart
+            renderComparisonChart(comp);
+
+            comparisonCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function renderComparisonChart(comparisonData) {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            
+            // Destroy previous chart instance if exists
+            if (comparisonChartInstance) {
+                comparisonChartInstance.destroy();
+            }
+
+            const algorithms = Object.keys(comparisonData);
+            const waitTimes = algorithms.map(algo => comparisonData[algo][0]);
+            const turnTimes = algorithms.map(algo => comparisonData[algo][1]);
+
+            comparisonChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: algorithms,
+                    datasets: [
+                        {
+                            label: 'Avg Waiting Time',
+                            data: waitTimes,
+                            backgroundColor: 'rgba(37, 99, 235, 0.7)',
+                            borderColor: '#2563eb',
+                            borderWidth: 1,
+                            borderRadius: 8,
+                        },
+                        {
+                            label: 'Avg Turnaround Time',
+                            data: turnTimes,
+                            backgroundColor: 'rgba(139, 92, 246, 0.7)',
+                            borderColor: '#8b5cf6',
+                            borderWidth: 1,
+                            borderRadius: 8,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { usePointStyle: true, boxWidth: 8 }
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#e2e8f0'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#e2e8f0' },
+                            title: {
+                                display: true,
+                                text: 'Time Units',
+                                color: '#475569'
+                            }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    },
+                    layout: {
+                        padding: { top: 10, bottom: 10 }
+                    }
+                }
+            });
+        }
+
+        // Event listeners
+        runBtn.addEventListener('click', runScheduling);
+        compareBtn.addEventListener('click', runComparison);
+
+        // Quantum visibility on load if RR checked
+        if (document.querySelector('input[name="algorithm"]:checked')?.value === 'RR') {
+            quantumWrapper.classList.remove('hidden');
+        }
+    })();
+</script>
+</body>
+</html>
